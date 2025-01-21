@@ -19,8 +19,12 @@ import {
   TabPanel,
   TabPanels,
 } from '@headlessui/react'
+
 import { Bars3Icon, MagnifyingGlassIcon, ShoppingBagIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import logo from '../../../assets/BELOGO.jpg'
+import Machine_1 from '../../../assets/Machine 1.jpg'
+import Machine_2 from '../../../assets/Machine 2.jpg'
+
 const navigation = {
   categories: [
     {
@@ -28,57 +32,57 @@ const navigation = {
       name: 'Home',
       featured: [
         {
-          name: 'New Arrivals',
+          name: '',
           href: '#',
-          imageSrc: 'https://tailwindui.com/plus/img/ecommerce-images/mega-menu-category-01.jpg',
+          imageSrc: Machine_1,
           imageAlt: 'Models sitting back to back, wearing Basic Tee in black and bone.',
         },
         {
-          name: 'Basic Tees',
+          name: '',
           href: '#',
-          imageSrc: 'https://tailwindui.com/plus/img/ecommerce-images/mega-menu-category-02.jpg',
+          imageSrc: Machine_2,
           imageAlt: 'Close up of Basic Tee fall bundle with off-white, ochre, olive, and black tees.',
         },
       ],
       sections: [
-        {
-          id: 'clothing',
-          name: 'Clothing',
-          items: [
-            { name: 'Tops', href: '#' },
-            { name: 'Dresses', href: '#' },
-            { name: 'Pants', href: '#' },
-            { name: 'Denim', href: '#' },
-            { name: 'Sweaters', href: '#' },
-            { name: 'T-Shirts', href: '#' },
-            { name: 'Jackets', href: '#' },
-            { name: 'Activewear', href: '#' },
-            { name: 'Browse All', href: '#' },
-          ],
-        },
-        {
-          id: 'accessories',
-          name: 'Accessories',
-          items: [
-            { name: 'Watches', href: '#' },
-            { name: 'Wallets', href: '#' },
-            { name: 'Bags', href: '#' },
-            { name: 'Sunglasses', href: '#' },
-            { name: 'Hats', href: '#' },
-            { name: 'Belts', href: '#' },
-          ],
-        },
-        {
-          id: 'brands',
-          name: 'Brands',
-          items: [
-            { name: 'Full Nelson', href: '#' },
-            { name: 'My Way', href: '#' },
-            { name: 'Re-Arranged', href: '#' },
-            { name: 'Counterfeit', href: '#' },
-            { name: 'Significant Other', href: '#' },
-          ],
-        },
+        // {
+        //   id: 'clothing',
+        //   name: 'Clothing',
+        //   items: [
+        //     { name: 'Tops', href: '#' },
+        //     { name: 'Dresses', href: '#' },
+        //     { name: 'Pants', href: '#' },
+        //     { name: 'Denim', href: '#' },
+        //     { name: 'Sweaters', href: '#' },
+        //     { name: 'T-Shirts', href: '#' },
+        //     { name: 'Jackets', href: '#' },
+        //     { name: 'Activewear', href: '#' },
+        //     { name: 'Browse All', href: '#' },
+        //   ],
+        // },
+        // {
+        //   id: 'accessories',
+        //   name: 'Accessories',
+        //   items: [
+        //     { name: 'Watches', href: '#' },
+        //     { name: 'Wallets', href: '#' },
+        //     { name: 'Bags', href: '#' },
+        //     { name: 'Sunglasses', href: '#' },
+        //     { name: 'Hats', href: '#' },
+        //     { name: 'Belts', href: '#' },
+        //   ],
+        // },
+        // {
+        //   id: 'brands',
+        //   name: 'Brands',
+        //   items: [
+        //     { name: 'Full Nelson', href: '#' },
+        //     { name: 'My Way', href: '#' },
+        //     { name: 'Re-Arranged', href: '#' },
+        //     { name: 'Counterfeit', href: '#' },
+        //     { name: 'Significant Other', href: '#' },
+        //   ],
+        // },
       ],
     },
     {
@@ -100,41 +104,41 @@ const navigation = {
         },
       ],
       sections: [
-        {
-          id: 'clothing',
-          name: 'Clothing',
-          items: [
-            { name: 'Tops', href: '#' },
-            { name: 'Pants', href: '#' },
-            { name: 'Sweaters', href: '#' },
-            { name: 'T-Shirts', href: '#' },
-            { name: 'Jackets', href: '#' },
-            { name: 'Activewear', href: '#' },
-            { name: 'Browse All', href: '#' },
-          ],
-        },
-        {
-          id: 'accessories',
-          name: 'Accessories',
-          items: [
-            { name: 'Watches', href: '#' },
-            { name: 'Wallets', href: '#' },
-            { name: 'Bags', href: '#' },
-            { name: 'Sunglasses', href: '#' },
-            { name: 'Hats', href: '#' },
-            { name: 'Belts', href: '#' },
-          ],
-        },
-        {
-          id: 'brands',
-          name: 'Brands',
-          items: [
-            { name: 'Re-Arranged', href: '#' },
-            { name: 'Counterfeit', href: '#' },
-            { name: 'Full Nelson', href: '#' },
-            { name: 'My Way', href: '#' },
-          ],
-        },
+        // {
+        //   id: 'clothing',
+        //   name: 'Clothing',
+        //   items: [
+        //     { name: 'Tops', href: '#' },
+        //     { name: 'Pants', href: '#' },
+        //     { name: 'Sweaters', href: '#' },
+        //     { name: 'T-Shirts', href: '#' },
+        //     { name: 'Jackets', href: '#' },
+        //     { name: 'Activewear', href: '#' },
+        //     { name: 'Browse All', href: '#' },
+        //   ],
+        // },
+        // {
+        //   id: 'accessories',
+        //   name: 'Accessories',
+        //   items: [
+        //     { name: 'Watches', href: '#' },
+        //     { name: 'Wallets', href: '#' },
+        //     { name: 'Bags', href: '#' },
+        //     { name: 'Sunglasses', href: '#' },
+        //     { name: 'Hats', href: '#' },
+        //     { name: 'Belts', href: '#' },
+        //   ],
+        // },
+        // {
+        //   id: 'brands',
+        //   name: 'Brands',
+        //   items: [
+        //     { name: 'Re-Arranged', href: '#' },
+        //     { name: 'Counterfeit', href: '#' },
+        //     { name: 'Full Nelson', href: '#' },
+        //     { name: 'My Way', href: '#' },
+        //   ],
+        // },
       ],
     },
   ],
@@ -333,7 +337,7 @@ export default function Navbar() {
                                       {item.name}
                                     </a>
                                     <p aria-hidden="true" className="mt-1">
-                                      Shop now
+                                      
                                     </p>
                                   </div>
                                 ))}
@@ -411,7 +415,7 @@ export default function Navbar() {
                 </div>
 
                 {/* Cart */}
-                <div className="ml-4 flow-root lg:ml-6">
+                {/* <div className="ml-4 flow-root lg:ml-6">
                   <a href="#" className="group -m-2 flex items-center p-2">
                     <ShoppingBagIcon
                       aria-hidden="true"
@@ -420,7 +424,7 @@ export default function Navbar() {
                     <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">0</span>
                     <span className="sr-only">items in cart, view bag</span>
                   </a>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
