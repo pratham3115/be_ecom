@@ -4,7 +4,20 @@ import Home from "./customer/components/home";
 import ProductPage from "./customer/components/product-page";
 
 function App() {
-  const categories = [
+  // Function to assign unique IDs to each product
+  const assignUniqueIds = (categories) => {
+    let currentId = 1;
+    return categories.map((category) => ({
+      ...category,
+      products: category.products.map((product) => ({
+        ...product,
+        id: currentId++, // Assign a unique ID to each product
+      })),
+    }));
+  };
+
+  // Original categories array (without guaranteed unique IDs)
+  const rawCategories = [
     {
       name: "Electronics",
       products: [
@@ -27,6 +40,9 @@ function App() {
     },
   ];
 
+  // Updated categories with unique IDs
+  const categories = assignUniqueIds(rawCategories);
+
   return (
     <Router>
       <div>
@@ -34,9 +50,12 @@ function App() {
         <Routes>
           {/* Home page route */}
           <Route path="/" element={<Home />} />
-          
+
           {/* Product page route */}
-          <Route path="/products" element={<ProductPage categories={categories} />} />
+          <Route
+            path="/products"
+            element={<ProductPage categories={categories} />}
+          />
         </Routes>
       </div>
     </Router>
