@@ -1,49 +1,71 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "./product-page-animation.css";
 
-const ProductPage = ({ categories }) => {
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
-  const [cart, setCart] = useState([]);
-  const [showCart, setShowCart] = useState(false);
+const ProductPage = () => {
+  const [categories, setCategories] = useState([]); // Categories from backend
+  const [selectedCategory, setSelectedCategory] = useState(null); // Selected category
+  const [cart, setCart] = useState(new Map()); // Cart state (using Map for efficient lookups)
+  const [showCart, setShowCart] = useState(false); // Toggle cart view
+  const [products, setProducts] = useState([]); // Products state for the selected category
+  const [loading, setLoading] = useState(true); // Loading state for category and products
 
-  // Load cart from localStorage on component mount
+  // Fetch categories from backend
   useEffect(() => {
-    const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCart(savedCart);
+    axios
+      .get("http://localhost:5000/api/categories")
+      .then((response) => {
+        if (response.data.length > 0) {
+          setCategories(response.data);
+          setSelectedCategory(response.data[0]); // Default to the first category
+          setLoading(false); // Stop loading once categories are fetched
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching categories:", err);
+        setLoading(false);
+      });
   }, []);
 
-  // Save cart to localStorage whenever it changes
+  // Fetch products based on selected category
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+    if (selectedCategory) {
+      setLoading(true); // Show loading spinner
+      axios
+        .get(`http://localhost:5000/api/products?category=${selectedCategory._id}`)
+        .then((response) => {
+          setProducts(response.data);
+          setLoading(false); // Stop loading once products are fetched
+        })
+        .catch((err) => {
+          console.error("Error fetching products:", err);
+          setLoading(false);
+        });
+    }
+  }, [selectedCategory]);
 
   // Handle category selection
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
-    setShowCart(false); // Auto-hide cart when changing categories
   };
 
   // Add product to cart
   const handleAddToCart = (product) => {
-    const updatedCart = [...cart];
-    const existingProductIndex = updatedCart.findIndex(
-      (item) => item.id === product.id
-    );
-
-    if (existingProductIndex >= 0) {
-      // If product exists, increase its quantity
-      updatedCart[existingProductIndex].quantity += 1;
-    } else {
-      // Add new product with quantity = 1
-      updatedCart.push({ ...product, quantity: 1 });
-    }
-
-    setCart(updatedCart);
-    console.log("Updated Cart:", updatedCart);
+    setCart((prevCart) => {
+      const updatedCart = new Map(prevCart);
+      if (updatedCart.has(product._id)) {
+        const item = updatedCart.get(product._id);
+        item.quantity += 1;
+      } else {
+        updatedCart.set(product._id, { ...product, quantity: 1 });
+      }
+      return updatedCart;
+    });
   };
 
-  // Handle Buy Now button
+  // Handle Buy Now
   const handleBuyNow = (product) => {
-    alert(`You bought ${product.name} for $${product.price * (product.quantity || 1)}!`);
+    alert(`Buying ${product.name} for $${product.price.toFixed(2)}!`);
   };
 
   // Toggle cart visibility
@@ -53,71 +75,88 @@ const ProductPage = ({ categories }) => {
 
   // Remove a product from the cart
   const handleRemoveFromCart = (productId) => {
-    const updatedCart = cart.filter((item) => item.id !== productId);
-    setCart(updatedCart);
+    setCart((prevCart) => {
+      const updatedCart = new Map(prevCart);
+      updatedCart.delete(productId);
+      return updatedCart;
+    });
   };
 
   // Adjust product quantity in the cart
   const handleQuantityChange = (productId, delta) => {
-    const updatedCart = cart.map((item) =>
-      item.id === productId
-        ? { ...item, quantity: Math.max(item.quantity + delta, 1) }
-        : item
-    );
-    setCart(updatedCart);
+    setCart((prevCart) => {
+      const updatedCart = new Map(prevCart);
+      const item = updatedCart.get(productId);
+      if (item) {
+        item.quantity = Math.max(item.quantity + delta, 1);
+      }
+      return updatedCart;
+    });
   };
 
   // Calculate total price
   const calculateTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    let total = 0;
+    for (const item of cart.values()) {
+      total += item.price * item.quantity;
+    }
+    return total;
   };
 
   return (
     <div className="product-page flex">
       {/* Sidebar for Categories */}
-      <aside className="w-1/4 p-4 bg-gray-100 border-r">
+      <aside className="sidebar w-1/4 p-4 bg-gray-100 border-r">
         <h2 className="font-bold text-lg mb-4">Categories</h2>
-        <ul>
-          {categories.map((category, index) => (
-            <li key={index}>
-              <button
-                className={`block w-full text-left px-4 py-2 rounded ${
-                  selectedCategory.name === category.name
-                    ? "bg-indigo-500 text-white"
-                    : "hover:bg-gray-200"
-                }`}
-                onClick={() => handleCategoryClick(category)}
-              >
-                {category.name}
-              </button>
-            </li>
-          ))}
-        </ul>
+        {loading ? (
+          <p>Loading categories...</p>
+        ) : categories.length === 0 ? (
+          <p>No categories found</p>
+        ) : (
+          <ul>
+            {categories.map((category) => (
+              <li key={category._id}>
+                <button
+                  className={`block w-full text-left px-4 py-2 rounded ${
+                    selectedCategory?._id === category._id
+                      ? "bg-indigo-500 text-white"
+                      : "hover:bg-gray-200"
+                  }`}
+                  onClick={() => handleCategoryClick(category)}
+                >
+                  {category.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </aside>
 
       {/* Main Content */}
       <div className="w-3/4 p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">
-            {showCart ? "Your Cart" : `Products in ${selectedCategory.name}`}
+            {showCart
+              ? "Your Cart"
+              : `Products in ${selectedCategory?.name || "Category"}`}
           </h2>
           <button
             className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
             onClick={handleCartClick}
           >
-            {showCart ? "Hide Cart" : `Cart (${cart.reduce((sum, item) => sum + item.quantity, 0)})`}
+            {showCart ? "Hide Cart" : `Cart (${cart.size})`}
           </button>
         </div>
 
         {/* Cart View */}
         {showCart ? (
           <div className="cart bg-gray-50 p-6 rounded shadow-md">
-            {cart.length > 0 ? (
+            {cart.size > 0 ? (
               <>
                 <ul className="space-y-4">
-                  {cart.map((item) => (
+                  {Array.from(cart.values()).map((item) => (
                     <li
-                      key={item.id}
+                      key={item._id}
                       className="flex items-center justify-between bg-white p-4 rounded shadow hover:shadow-lg"
                     >
                       <div className="flex items-center">
@@ -132,14 +171,18 @@ const ProductPage = ({ categories }) => {
                           <div className="flex items-center mt-2">
                             <button
                               className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                              onClick={() => handleQuantityChange(item.id, -1)}
+                              onClick={() =>
+                                handleQuantityChange(item._id, -1)
+                              }
                             >
                               -
                             </button>
                             <span className="px-4">{item.quantity}</span>
                             <button
                               className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                              onClick={() => handleQuantityChange(item.id, 1)}
+                              onClick={() =>
+                                handleQuantityChange(item._id, 1)
+                              }
                             >
                               +
                             </button>
@@ -148,7 +191,7 @@ const ProductPage = ({ categories }) => {
                       </div>
                       <button
                         className="text-red-500 hover:underline"
-                        onClick={() => handleRemoveFromCart(item.id)}
+                        onClick={() => handleRemoveFromCart(item._id)}
                       >
                         Remove
                       </button>
@@ -159,42 +202,58 @@ const ProductPage = ({ categories }) => {
                   <span>Total Price:</span>
                   <span>${calculateTotalPrice().toFixed(2)}</span>
                 </div>
+                <button
+                  className="w-full mt-6 bg-green-500 text-white py-3 px-4 rounded hover:bg-green-600"
+                  onClick={() => alert("Purchase complete!")}
+                >
+                  Buy Now
+                </button>
               </>
             ) : (
               <p>Your cart is empty.</p>
             )}
           </div>
         ) : (
-          /* Product List View */
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {selectedCategory.products.map((product) => (
-              <div
-                key={product.id}
-                className="border rounded-lg p-4 shadow-sm hover:shadow-lg transition"
-              >
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-32 object-cover rounded mb-4"
-                />
-                <h3 className="font-semibold text-lg">{product.name}</h3>
-                <p className="text-gray-600 mb-4">Price: ${product.price}</p>
-                <div className="flex space-x-2">
-                  <button
-                    className="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-                    onClick={() => handleAddToCart(product)}
+            {products.length > 0 ? (
+              products.map((product) => (
+                <div
+                  key={product._id}
+                  className="border rounded-lg p-4 shadow-sm hover:shadow-lg transition"
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-32 object-cover rounded mb-4"
+                  />
+                  <h3 className="font-semibold text-lg">{product.name}</h3>
+                  <p className="text-gray-600 mb-4">Price: ${product.price}</p>
+                  <p
+                    className={`text-sm ${
+                      product.inStock ? "text-green-500" : "text-red-500"
+                    }`}
                   >
-                    Add to Cart
-                  </button>
-                  <button
-                    className="flex-1 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
-                    onClick={() => handleBuyNow(product)}
-                  >
-                    Buy Now
-                  </button>
+                    {product.inStock ? "In Stock" : "Out of Stock"}
+                  </p>
+                  <div className="flex space-x-2">
+                    <button
+                      className="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      Add to Cart
+                    </button>
+                    <button
+                      className="flex-1 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+                      onClick={() => handleBuyNow(product)}
+                    >
+                      Buy Now
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p>No products available in this category.</p>
+            )}
           </div>
         )}
       </div>
