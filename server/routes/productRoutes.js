@@ -1,23 +1,39 @@
 const express = require("express");
 const multer = require("multer");
-const Product = require("../models/product"); // Import the product model
+const Product = require("../models/product");
 const router = express.Router();
 
-// Fetch products by category
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+const upload = multer({ storage });
+
+// Fetch products by category or all products
 router.get("/", async (req, res) => {
   try {
-    const categoryId = req.query.category; // Get category ID from query params
-    const products = await Product.find({ category: categoryId }); // Find products by category
+    const categoryId = req.query.category;
+    const query = categoryId ? { category: categoryId } : {}; // Filter by category if provided
+    const products = await Product.find(query).populate("category");
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Add a new product
-router.post("/", async (req, res) => {
-  const product = new Product(req.body);
+// Add a new product with image upload
+router.post("/", upload.single("image"), async (req, res) => {
   try {
+    const productData = req.body;
+    if (req.file) {
+      productData.image = `/uploads/${req.file.filename}`;
+    }
+    const product = new Product(productData);
     const savedProduct = await product.save();
     res.status(201).json(savedProduct);
   } catch (err) {
@@ -25,14 +41,12 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Update product details (e.g., inStock status)
+// Update product details
 router.put("/:id", async (req, res) => {
   try {
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     res.json(updatedProduct);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -46,33 +60,6 @@ router.delete("/:id", async (req, res) => {
     res.json({ message: "Product deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
-  }
-});
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Save uploaded files in the "uploads" folder
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname); // Rename the file with a timestamp
-  },
-});
-
-const upload = multer({ storage });
-
-// Add a new product with image upload
-router.post("/", upload.single("image"), async (req, res) => {
-  try {
-    const productData = req.body;
-    if (req.file) {
-      productData.image = `/uploads/${req.file.filename}`; // Save image path
-    }
-    const product = new Product(productData);
-    const savedProduct = await product.save();
-    res.status(201).json(savedProduct);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
   }
 });
 

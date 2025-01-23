@@ -10,11 +10,10 @@ const ProductPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // Number of products per page
 
-  // Fetch categories from backend
+  const itemsPerPage = 6;
+  const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
     setLoading(true);
     axios
@@ -25,29 +24,29 @@ const ProductPage = () => {
           setSelectedCategory(response.data[0]);
         }
       })
-      .catch((err) => setError("Failed to load categories"))
       .finally(() => setLoading(false));
   }, []);
 
-  // Fetch products based on selected category
   useEffect(() => {
     if (selectedCategory) {
-      setLoading(true);
       axios
         .get(`http://localhost:5000/api/products?category=${selectedCategory._id}`)
-        .then((response) => setProducts(response.data))
-        .catch(() => setError("Failed to load products"))
-        .finally(() => setLoading(false));
+        .then((response) => {
+          setProducts(response.data);
+          setCurrentPage(1);
+        })
+        .catch((err) => {
+          console.error("Error fetching products:", err);
+        });
     }
   }, [selectedCategory]);
 
-  // Handle category selection
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
-    setCurrentPage(1); // Reset to the first page when category changes
+    setCurrentPage(1);
+    setShowCart(false); // Auto-hide cart when selecting a category
   };
 
-  // Add product to cart
   const handleAddToCart = (product) => {
     setCart((prevCart) => {
       const updatedCart = new Map(prevCart);
@@ -61,17 +60,103 @@ const ProductPage = () => {
     });
   };
 
-  // Handle pagination
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
+  const handleRemoveFromCart = (productId) => {
+    setCart((prevCart) => {
+      const updatedCart = new Map(prevCart);
+      updatedCart.delete(productId);
+      return updatedCart;
+    });
   };
 
-  // Filter products by search term
+  const handleQuantityChange = (productId, change) => {
+    setCart((prevCart) => {
+      const updatedCart = new Map(prevCart);
+      const item = updatedCart.get(productId);
+
+      if (item) {
+        const newQuantity = item.quantity + change;
+        if (newQuantity <= 0) {
+          updatedCart.delete(productId); // Remove product if quantity is 0
+        } else {
+          item.quantity = newQuantity;
+          updatedCart.set(productId, item);
+        }
+      }
+
+      return updatedCart;
+    });
+  };
+
+  const calculateTotalPrice = () => {
+    return Array.from(cart.values()).reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
+  };
+
+  const handleBuyNow = (product) => {
+    alert(`Proceeding to buy: ${product.name}`);
+    // Redirect to checkout or payment page logic can be added here
+  };
+
+  const handleBuyCart = () => {
+    alert("Proceeding to buy all items in the cart.");
+    // Redirect to checkout or payment page logic can be added here
+  };
+
+  const renderCartItems = () =>
+    Array.from(cart.values()).map((item) => (
+      <div
+        key={item._id}
+        className="flex items-center border rounded-lg p-4 shadow-sm hover:shadow-lg transition mb-4"
+      >
+        <img
+          src={item.image || "/placeholder.png"}
+          alt={item.name}
+          className="w-16 h-16 object-cover rounded mr-4"
+        />
+        <div className="flex-1">
+          <h3 className="font-semibold text-lg">{item.name}</h3>
+          <p className="text-gray-600">Price: ${item.price}</p>
+          <div className="flex items-center mt-2">
+            <button
+              className="bg-gray-200 px-2 py-1 rounded"
+              onClick={() => handleQuantityChange(item._id, -1)}
+            >
+              -
+            </button>
+            <span className="px-4">{item.quantity}</span>
+            <button
+              className="bg-gray-200 px-2 py-1 rounded"
+              onClick={() => handleQuantityChange(item._id, 1)}
+            >
+              +
+            </button>
+          </div>
+        </div>
+        <button
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ml-4"
+          onClick={() => handleRemoveFromCart(item._id)}
+        >
+          Remove
+        </button>
+      </div>
+    ));
+
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage((prevPage) => prevPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage((prevPage) => prevPage + 1);
+  };
+
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Paginate products
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -79,7 +164,6 @@ const ProductPage = () => {
 
   return (
     <div className="product-page flex">
-      {/* Sidebar for Categories */}
       <aside className="sidebar w-1/4 p-4 bg-gray-100 border-r">
         <h2 className="font-bold text-lg mb-4">Categories</h2>
         {loading ? (
@@ -106,13 +190,10 @@ const ProductPage = () => {
         )}
       </aside>
 
-      {/* Main Content */}
       <div className="w-3/4 p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">
-            {showCart
-              ? "Your Cart"
-              : `Products in ${selectedCategory?.name || "Category"}`}
+            {showCart ? "Your Cart" : `Products in ${selectedCategory?.name || "Category"}`}
           </h2>
           <input
             type="text"
@@ -129,14 +210,26 @@ const ProductPage = () => {
           </button>
         </div>
 
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-
-        {/* Product List or Loading */}
-        {loading ? (
-          <p>Loading products...</p>
-        ) : showCart ? (
-          <div className="cart">
-            {/* Render cart items */}
+        {showCart ? (
+          <div>
+            {cart.size > 0 ? (
+              <>
+                <div>{renderCartItems()}</div>
+                <div className="flex justify-between items-center mt-4">
+                  <h3 className="text-lg font-semibold">
+                    Total: ${calculateTotalPrice().toFixed(2)}
+                  </h3>
+                  <button
+                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                    onClick={handleBuyCart}
+                  >
+                    Buy Now
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p>Your cart is empty.</p>
+            )}
           </div>
         ) : paginatedProducts.length > 0 ? (
           <>
@@ -147,37 +240,48 @@ const ProductPage = () => {
                   className="border rounded-lg p-4 shadow-sm hover:shadow-lg transition"
                 >
                   <img
-                    src={product.image}
+                    src={product.image || "/placeholder.png"}
                     alt={product.name}
                     className="w-full h-32 object-cover rounded mb-4"
                   />
                   <h3 className="font-semibold text-lg">{product.name}</h3>
                   <p className="text-gray-600 mb-4">Price: ${product.price}</p>
-                  <button
-                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-                    onClick={() => handleAddToCart(product)}
-                  >
-                    Add to Cart
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      Add to Cart
+                    </button>
+                    <button
+                      className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+                      onClick={() => handleBuyNow(product)}
+                    >
+                      Buy Now
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Pagination */}
-            <div className="flex justify-center mt-6">
-              {Array.from({
-                length: Math.ceil(filteredProducts.length / itemsPerPage),
-              }).map((_, index) => (
-                <button
-                  key={index}
-                  className={`mx-1 px-4 py-2 border ${
-                    currentPage === index + 1 ? "bg-indigo-500 text-white" : ""
-                  }`}
-                  onClick={() => handlePageChange(index + 1)}
-                >
-                  {index + 1}
-                </button>
-              ))}
+            <div className="flex justify-between items-center mt-4">
+              <button
+                className="bg-gray-300 py-1 px-4 rounded disabled:opacity-50"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                className="bg-gray-300 py-1 px-4 rounded disabled:opacity-50"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
             </div>
           </>
         ) : (

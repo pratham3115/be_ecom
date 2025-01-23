@@ -16,25 +16,21 @@ const AdminPanel = () => {
   const [newCategory, setNewCategory] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Fetch products and categories from API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/products");
-        console.log("Fetched products:", response.data); // Debug fetched products
-        setProducts(response.data || []); // Ensure data is an array
+        setProducts(response.data || []);
       } catch (error) {
         console.error("Error fetching products:", error);
         alert("Failed to fetch products. Please try again.");
       }
     };
 
-
     const fetchCategories = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/categories");
-        console.log("Fetched categories:", response.data); // Debug fetched categories
-        setCategories(response.data || []); // Ensure data is an array
+        setCategories(response.data || []);
       } catch (error) {
         console.error("Error fetching categories:", error);
         alert("Failed to fetch categories. Please try again.");
@@ -45,7 +41,6 @@ const AdminPanel = () => {
     fetchCategories();
   }, []);
 
-  /// Handle form input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -53,8 +48,6 @@ const AdminPanel = () => {
       [name]: type === "checkbox" ? checked : value,
     });
   };
-
-  
 
   const handleAddCategory = () => {
     if (newCategory.trim()) {
@@ -76,7 +69,6 @@ const AdminPanel = () => {
     }
   };
 
-  // Handle deleting a category
   const handleDeleteCategory = (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       setLoading(true);
@@ -94,7 +86,6 @@ const AdminPanel = () => {
     }
   };
 
-  // Add a new product
   const handleAddProduct = () => {
     setLoading(true);
     axios
@@ -111,24 +102,6 @@ const AdminPanel = () => {
       .finally(() => setLoading(false));
   };
 
-  // Edit a product
-  const handleEditProduct = (id) => {
-    setLoading(true);
-    axios
-      .put(`http://localhost:5000/api/products/${id}`, formData)
-      .then((response) => {
-        setProducts(products.map((p) => (p._id === id ? response.data : p)));
-        resetForm();
-        alert("Product updated successfully!");
-      })
-      .catch((err) => {
-        console.error("Error editing product:", err);
-        alert("Failed to edit product.");
-      })
-      .finally(() => setLoading(false));
-  };
-
-  // Delete a product
   const handleDeleteProduct = (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       setLoading(true);
@@ -146,22 +119,6 @@ const AdminPanel = () => {
     }
   };
 
-  // Mark product as out of stock
-  const handleMarkOutOfStock = (id) => {
-    setLoading(true);
-    axios
-      .put(`http://localhost:5000/api/products/${id}`, { inStock: false })
-      .then((response) => {
-        setProducts(products.map((p) => (p._id === id ? response.data : p)));
-        alert("Product marked as out of stock!");
-      })
-      .catch((err) => {
-        console.error("Error marking product as out of stock:", err);
-        alert("Failed to mark product as out of stock.");
-      })
-      .finally(() => setLoading(false));
-  };
-
   const resetForm = () => {
     setFormData({
       name: "",
@@ -177,7 +134,6 @@ const AdminPanel = () => {
     <div className="admin-panel">
       <h1>Admin Panel</h1>
 
-      {/* Add Category Section */}
       <h2>Add a New Category</h2>
       <input
         type="text"
@@ -201,7 +157,6 @@ const AdminPanel = () => {
         ))}
       </ul>
 
-      {/* Add/Edit Product Section */}
       <h2>{formData._id ? "Edit Product" : "Add Product"}</h2>
       <form onSubmit={(e) => e.preventDefault()}>
         <input
@@ -240,7 +195,6 @@ const AdminPanel = () => {
             onChange={handleInputChange}
           />
         </label>
-        
         <select
           name="category"
           value={formData.category}
@@ -254,40 +208,28 @@ const AdminPanel = () => {
             </option>
           ))}
         </select>
-        <button
-          onClick={formData._id ? () => handleEditProduct(formData._id) : handleAddProduct}
-          disabled={loading}
-        >
-          {loading ? "Processing..." : formData._id ? "Update Product" : "Add Product"}
+        <button onClick={handleAddProduct} disabled={loading}>
+          {loading ? "Processing..." : "Add Product"}
         </button>
         <button type="button" onClick={resetForm}>
           Cancel
         </button>
       </form>
 
-      {/* Product List */}
-      <div>
-        <h2>Product List</h2>
-        <ul>
-          {products.map((product) => (
-            <li key={product._id}>
-              <h3>{product.name}</h3>
-              <p>{product.description}</p>
-              <p>Price: ${product.price}</p>
-              <p>{product.inStock ? "In Stock" : "Out of Stock"}</p>
-              <button onClick={() => setFormData(product)}>Edit</button>
-              <button onClick={() => handleDeleteProduct(product._id)} disabled={loading}>
-                Delete
-              </button>
-              {product.inStock && (
-                <button onClick={() => handleMarkOutOfStock(product._id)} disabled={loading}>
-                  Mark as Out of Stock
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <h2>Product List</h2>
+      <ul>
+        {products.map((product) => (
+          <li key={product._id}>
+            <h3>{product.name}</h3>
+            <p>{product.description}</p>
+            <p>Price: ${product.price}</p>
+            <p>{product.inStock ? "In Stock" : "Out of Stock"}</p>
+            <button onClick={() => handleDeleteProduct(product._id)} disabled={loading}>
+              Delete
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
