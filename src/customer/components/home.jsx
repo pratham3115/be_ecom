@@ -9,6 +9,8 @@ import IntroVideo from "../../assets/Intro.mp4";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
+
+
 // Hero Section Component
 const Hero = () => {
   return (
@@ -58,6 +60,7 @@ const Home = () => {
       {/* Hero Section with Video */}
       <Hero />
 
+<<<<<<< HEAD
       {/* Features Section */}
       <section id="features" className="py-20">
         <div className="container mx-auto px-4">
@@ -82,6 +85,12 @@ const Home = () => {
 
       {/* Machinery Section with Carousel */}
       <div className="text-center p-6 bg-gray-50">
+=======
+       
+
+      {/* Machinery Section */}
+      <div className="text-center p-6">
+>>>>>>> 15e25452afa4f14c923bb19f9ed43952fc62df64
         <h2 className="text-3xl font-bold mb-6">Our Machinery</h2>
         <div className="w-full max-w-4xl mx-auto">
           <Slider {...settings}>
@@ -192,4 +201,8 @@ const Home = () => {
   );
 };
 
+<<<<<<< HEAD
 export default Home;
+=======
+export default Home;
+>>>>>>> 15e25452afa4f14c923bb19f9ed43952fc62df64

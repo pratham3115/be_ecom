@@ -11,22 +11,41 @@ const AdminPanel = () => {
     description: "",
     image: "",
     inStock: true,
-    category: "", // Category field for products
+    category: "",
   });
-  const [newCategory, setNewCategory] = useState(""); // For adding a new category
+  const [newCategory, setNewCategory] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Fetch products and categories from API
   useEffect(() => {
-    axios.get("http://localhost:5000/api/products").then((response) => {
-      setProducts(response.data);
-    });
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/products");
+        console.log("Fetched products:", response.data); // Debug fetched products
+        setProducts(response.data || []); // Ensure data is an array
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        alert("Failed to fetch products. Please try again.");
+      }
+    };
 
-    axios.get("http://localhost:5000/api/categories").then((response) => {
-      setCategories(response.data); // Store existing categories
-    });
+
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/categories");
+        console.log("Fetched categories:", response.data); // Debug fetched categories
+        setCategories(response.data || []); // Ensure data is an array
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        alert("Failed to fetch categories. Please try again.");
+      }
+    };
+
+    fetchProducts();
+    fetchCategories();
   }, []);
 
-  // Handle form input changes
+  /// Handle form input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -35,74 +54,23 @@ const AdminPanel = () => {
     });
   };
 
-  // Handle category selection change
-  const handleCategoryChange = (e) => {
-    setFormData({
-      ...formData,
-      category: e.target.value,
-    });
-  };
+  
 
-  // Add a new product
-  const handleAddProduct = () => {
-    axios
-      .post("http://localhost:5000/api/products", formData)
-      .then((response) => {
-        setProducts([...products, response.data]);
-        setFormData({
-          name: "",
-          price: "",
-          description: "",
-          image: "",
-          inStock: true,
-          category: "",
-        });
-      })
-      .catch((err) => console.error(err));
-  };
-
-  // Edit a product
-  const handleEditProduct = (id) => {
-    axios
-      .put(`http://localhost:5000/api/products/${id}`, formData)
-      .then((response) => {
-        setProducts(products.map((p) => (p._id === id ? response.data : p)));
-        setFormData({
-          name: "",
-          price: "",
-          description: "",
-          image: "",
-          inStock: true,
-          category: "",
-        });
-      })
-      .catch((err) => console.error(err));
-  };
-
-  // Delete a product
-  const handleDeleteProduct = (id) => {
-    axios
-      .delete(`http://localhost:5000/api/products/${id}`)
-      .then(() => {
-        setProducts(products.filter((p) => p._id !== id));
-      })
-      .catch((err) => console.error(err));
-  };
-
-  // Handle adding a new category
   const handleAddCategory = () => {
     if (newCategory.trim()) {
+      setLoading(true);
       axios
         .post("http://localhost:5000/api/categories", { name: newCategory })
         .then((response) => {
           setCategories([...categories, response.data]);
-          setNewCategory(""); // Clear the input field
+          setNewCategory("");
           alert("Category added successfully!");
         })
-        .catch((error) => {
-          console.error("Error adding category:", error);
+        .catch((err) => {
+          console.error("Error adding category:", err);
           alert("Failed to add category.");
-        });
+        })
+        .finally(() => setLoading(false));
     } else {
       alert("Please enter a category name.");
     }
@@ -110,26 +78,99 @@ const AdminPanel = () => {
 
   // Handle deleting a category
   const handleDeleteCategory = (id) => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
+      setLoading(true);
+      axios
+        .delete(`http://localhost:5000/api/categories/${id}`)
+        .then(() => {
+          setCategories(categories.filter((category) => category._id !== id));
+          alert("Category deleted successfully!");
+        })
+        .catch((err) => {
+          console.error("Error deleting category:", err);
+          alert("Failed to delete category.");
+        })
+        .finally(() => setLoading(false));
+    }
+  };
+
+  // Add a new product
+  const handleAddProduct = () => {
+    setLoading(true);
     axios
-      .delete(`http://localhost:5000/api/categories/${id}`)
-      .then(() => {
-        setCategories(categories.filter((category) => category._id !== id));
-        alert("Category deleted successfully!");
+      .post("http://localhost:5000/api/products", formData)
+      .then((response) => {
+        setProducts([...products, response.data]);
+        resetForm();
+        alert("Product added successfully!");
       })
       .catch((err) => {
-        console.error("Error deleting category:", err);
-        alert("Failed to delete category.");
-      });
+        console.error("Error adding product:", err);
+        alert("Failed to add product.");
+      })
+      .finally(() => setLoading(false));
+  };
+
+  // Edit a product
+  const handleEditProduct = (id) => {
+    setLoading(true);
+    axios
+      .put(`http://localhost:5000/api/products/${id}`, formData)
+      .then((response) => {
+        setProducts(products.map((p) => (p._id === id ? response.data : p)));
+        resetForm();
+        alert("Product updated successfully!");
+      })
+      .catch((err) => {
+        console.error("Error editing product:", err);
+        alert("Failed to edit product.");
+      })
+      .finally(() => setLoading(false));
+  };
+
+  // Delete a product
+  const handleDeleteProduct = (id) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      setLoading(true);
+      axios
+        .delete(`http://localhost:5000/api/products/${id}`)
+        .then(() => {
+          setProducts(products.filter((product) => product._id !== id));
+          alert("Product deleted successfully!");
+        })
+        .catch((err) => {
+          console.error("Error deleting product:", err);
+          alert("Failed to delete product.");
+        })
+        .finally(() => setLoading(false));
+    }
   };
 
   // Mark product as out of stock
   const handleMarkOutOfStock = (id) => {
+    setLoading(true);
     axios
       .put(`http://localhost:5000/api/products/${id}`, { inStock: false })
       .then((response) => {
         setProducts(products.map((p) => (p._id === id ? response.data : p)));
+        alert("Product marked as out of stock!");
       })
-      .catch((err) => console.error("Error marking out of stock:", err));
+      .catch((err) => {
+        console.error("Error marking product as out of stock:", err);
+        alert("Failed to mark product as out of stock.");
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      price: "",
+      description: "",
+      image: "",
+      inStock: true,
+      category: "",
+    });
   };
 
   return (
@@ -144,17 +185,16 @@ const AdminPanel = () => {
         onChange={(e) => setNewCategory(e.target.value)}
         placeholder="Enter category name"
       />
-      <button onClick={handleAddCategory}>Add Category</button>
+      <button onClick={handleAddCategory} disabled={loading}>
+        {loading ? "Adding..." : "Add Category"}
+      </button>
 
       <h3>Existing Categories</h3>
       <ul>
         {categories.map((category) => (
-          <li key={category._id} className="category-item">
+          <li key={category._id}>
             {category.name}
-            <button
-              className="delete-btn"
-              onClick={() => handleDeleteCategory(category._id)}
-            >
+            <button onClick={() => handleDeleteCategory(category._id)} disabled={loading}>
               Delete
             </button>
           </li>
@@ -200,12 +240,11 @@ const AdminPanel = () => {
             onChange={handleInputChange}
           />
         </label>
-
-        {/* Category Selector */}
+        
         <select
           name="category"
           value={formData.category}
-          onChange={handleCategoryChange}
+          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
           required
         >
           <option value="">Select Category</option>
@@ -215,34 +254,33 @@ const AdminPanel = () => {
             </option>
           ))}
         </select>
-
         <button
-          onClick={
-            formData._id
-              ? () => handleEditProduct(formData._id)
-              : handleAddProduct
-          }
+          onClick={formData._id ? () => handleEditProduct(formData._id) : handleAddProduct}
+          disabled={loading}
         >
-          {formData._id ? "Update Product" : "Add Product"}
+          {loading ? "Processing..." : formData._id ? "Update Product" : "Add Product"}
+        </button>
+        <button type="button" onClick={resetForm}>
+          Cancel
         </button>
       </form>
 
       {/* Product List */}
-      <div className="product-list">
+      <div>
         <h2>Product List</h2>
         <ul>
           {products.map((product) => (
-            <li key={product._id} className="product-item">
+            <li key={product._id}>
               <h3>{product.name}</h3>
               <p>{product.description}</p>
               <p>Price: ${product.price}</p>
               <p>{product.inStock ? "In Stock" : "Out of Stock"}</p>
               <button onClick={() => setFormData(product)}>Edit</button>
-              <button onClick={() => handleDeleteProduct(product._id)}>
+              <button onClick={() => handleDeleteProduct(product._id)} disabled={loading}>
                 Delete
               </button>
               {product.inStock && (
-                <button onClick={() => handleMarkOutOfStock(product._id)}>
+                <button onClick={() => handleMarkOutOfStock(product._id)} disabled={loading}>
                   Mark as Out of Stock
                 </button>
               )}

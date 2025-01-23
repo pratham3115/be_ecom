@@ -52,10 +52,14 @@
     ]
   },
   "devDependencies": {
+<<<<<<< HEAD
     "@eslint/js": "^9.18.0",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.37.4",
     "globals": "^15.14.0",
+=======
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+>>>>>>> 15e25452afa4f14c923bb19f9ed43952fc62df64
     "tailwindcss": "^3.4.17"
   }
 }
