@@ -6,6 +6,14 @@ import Machine_1 from "../../assets/Machine 1.jpg";
 import Machine_2 from "../../assets/Machine 2.jpg";
 import Machine_3 from "../../assets/Machine 3.jpg";
 import IntroVideo from "../../assets/Intro.mp4";
+import Product_1 from "../../assets/White electric.jpg";
+import Product_2 from "../../assets/Fine_circle.jpg";
+import Product_3 from "../../assets/Circle spark.jpg";
+import Product_4 from "../../assets/cap.jpg";
+import Product_5 from "../../assets/circle plate.jpg";
+import Product_6 from "../../assets/Thin plate.jpg";
+import Product_7 from "../../assets/Types_fuse.jpg";
+import Product_8 from "../../assets/grip.jpg";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
@@ -60,37 +68,10 @@ const Home = () => {
       {/* Hero Section with Video */}
       <Hero />
 
-<<<<<<< HEAD
-      {/* Features Section */}
-      <section id="features" className="py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-16">FEATURES</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[1, 2, 3, 4].map((feature) => (
-              <div key={feature} className="text-center">
-                <div className="w-24 h-24 bg-blue-500 rounded-full mx-auto mb-6 flex items-center justify-center">
-                  <div className="w-12 h-12 text-white">
-                    {/* Icon placeholder */}
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold mb-4">Lorem ipsum</h3>
-                <p className="text-gray-600">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Machinery Section with Carousel */}
-      <div className="text-center p-6 bg-gray-50">
-=======
        
 
       {/* Machinery Section */}
       <div className="text-center p-6">
->>>>>>> 15e25452afa4f14c923bb19f9ed43952fc62df64
         <h2 className="text-3xl font-bold mb-6">Our Machinery</h2>
         <div className="w-full max-w-4xl mx-auto">
           <Slider {...settings}>
@@ -139,26 +120,27 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Gallery Section */}
-      <section id="gallery" className="py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-16">GALLERY</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-              <div key={item} className="aspect-square">
-                <img
-                  src={`/placeholder.svg?height=300&width=300`}
-                  alt={`Gallery item ${item}`}
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              </div>
-            ))}
-          </div>
+ {/* Products Section */}
+<section id="Products" className="py-20">
+  <div className="container mx-auto px-4">
+    <h2 className="text-3xl font-bold text-center mb-16">Products</h2>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {[Product_1, Product_2, Product_3, Product_4, Product_5, Product_6, Product_7, Product_8].map((item, index) => (
+        <div key={index} className="aspect-square">
+          {/* First Image */}
+          <img
+            src={item}
+            alt={`Products item ${index + 1}`}
+            className="w-full h-full object-cover rounded-lg mb-4" // Added margin-bottom for spacing
+          />
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 bg-blue-500 text-white">
+      <section id="contact" className="py-16 bg-blue-500 text-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-16">GET IN TOUCH</h2>
           <div className="max-w-2xl mx-auto">
@@ -201,8 +183,4 @@ const Home = () => {
   );
 };
 
-<<<<<<< HEAD
 export default Home;
-=======
-export default Home;
->>>>>>> 15e25452afa4f14c923bb19f9ed43952fc62df64
