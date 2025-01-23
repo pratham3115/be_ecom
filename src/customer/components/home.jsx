@@ -7,6 +7,8 @@ import IntroVideo from "../../assets/Intro.mp4"; // Ensure this path is correct
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
+
+
 // Hero Section Component
 const Hero = () => {
   return (
@@ -33,8 +35,6 @@ const Hero = () => {
         </p>
       </div>
 
-<<<<<<< HEAD
-=======
       {/* Overlay Background */}
       <div className="absolute inset-0 bg-black opacity-40"></div>
     </div>
@@ -57,6 +57,8 @@ const Home = () => {
     <>
       {/* Hero Section */}
       <Hero />
+
+       
 
       {/* Machinery Section */}
       <div className="text-center p-6">
@@ -92,4 +94,3 @@ const Home = () => {
 };
 
 export default Home;
->>>>>>> dc3ff9473e6ef859665e759a35432a245ee070e5
