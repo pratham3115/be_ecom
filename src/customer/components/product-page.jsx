@@ -17,7 +17,7 @@ const ProductPage = () => {
   useEffect(() => {
     setLoading(true);
     axios
-      .get("http://localhost:5000/api/categories")
+      .get("http://localhost:27017/api/categories")
       .then((response) => {
         if (response.data.length > 0) {
           setCategories(response.data);
@@ -30,7 +30,7 @@ const ProductPage = () => {
   useEffect(() => {
     if (selectedCategory) {
       axios
-        .get(`http://localhost:5000/api/products?category=${selectedCategory._id}`)
+        .get(`http://localhost:27017/api/products?category=${selectedCategory._id}`)
         .then((response) => {
           setProducts(response.data);
           setCurrentPage(1);
