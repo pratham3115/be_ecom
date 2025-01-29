@@ -19,18 +19,6 @@ export default function ProductPage() {
   const categoriesRef = useRef(null);
 
   useEffect(() => {
-<<<<<<< HEAD
-    setLoading(true);
-    axios
-      .get("http://localhost:27017/api/categories")
-      .then((response) => {
-        if (response.data.length > 0) {
-          setCategories(response.data);
-          setSelectedCategory(response.data[0]);
-        }
-      })
-      .finally(() => setLoading(false));
-=======
     // Fetch categories
     fetch("http://localhost:5000/api/categories")
       .then((res) => res.json())
@@ -38,27 +26,14 @@ export default function ProductPage() {
         setCategories(data);
         if (data.length > 0) setSelectedCategory(data[0]);
       });
->>>>>>> 9badd8856eed4514ca89f09c42f1bb8fa295d8b4
   }, []);
 
   useEffect(() => {
     // Fetch products for the selected category
     if (selectedCategory) {
-<<<<<<< HEAD
-      axios
-        .get(`http://localhost:27017/api/products?category=${selectedCategory._id}`)
-        .then((response) => {
-          setProducts(response.data);
-          setCurrentPage(1);
-        })
-        .catch((err) => {
-          console.error("Error fetching products:", err);
-        });
-=======
       fetch(`http://localhost:5000/api/products?category=${selectedCategory._id}`)
         .then((res) => res.json())
         .then((data) => setProducts(data));
->>>>>>> 9badd8856eed4514ca89f09c42f1bb8fa295d8b4
     }
   }, [selectedCategory]);
 

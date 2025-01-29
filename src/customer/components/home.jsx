@@ -470,7 +470,7 @@ const Home = () => {
               {/* Section 4 */}
               <div className="space-y-3">
                 <h3 className="text-base font-semibold text-white">ADDRESS</h3>
-                <p className="text-sm">Bhuwan Enterprise™ 5, Samrat Industrial Area, Gondal Road, Rajkot</p>
+                <p className="text-sm"> Shed No.5, Plot No. 272, Parth Ind. Estate, Damanganga Industrial Park, Karvad Vapi- 396193, GUJARAT</p>
               </div>
             </div>
 

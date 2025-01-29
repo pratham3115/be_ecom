@@ -124,21 +124,21 @@ const Contact = () => {
             <div>
               <h2 className="text-xl font-semibold text-gray-800 mb-4">E-mail</h2>
               <a href="mailto:contact@example.com" className="text-blue-600 hover:text-blue-800">
-                contact@example.com
+               bhuwanenterprise@yahoo.com
               </a>
             </div>
 
             <div>
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Tel</h2>
               <a href="tel:86-13915087629" className="text-blue-600 hover:text-blue-800">
-                86-13915087629
+              +91 8866082044
               </a>
             </div>
 
             <div>
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Address</h2>
               <p className="text-gray-600">
-                E2 Jiangsu Wujin Branch Park,wujin district Changzhou, Jiangsu,China
+              Shed No.5, Plot No. 272, Parth Ind. Estate, Damanganga Industrial Park, Karvad Vapi- 396193, GUJARAT
               </p>
             </div>
 
@@ -224,7 +224,7 @@ const Contact = () => {
 
             <div className="space-y-3">
               <h3 className="text-lg font-semibold text-white">ADDRESS</h3>
-              <p>Bhuwan Enterprise™ 5, Samrat Industrial Area, Gondal Road, Rajkot</p>
+              <p> Shed No.5, Plot No. 272, Parth Ind. Estate, Damanganga Industrial Park, Karvad Vapi- 396193, GUJARAT</p>
             </div>
           </div>
 
