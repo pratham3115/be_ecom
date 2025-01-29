@@ -27,7 +27,9 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.startsWith("image/")) {
       cb(new Error("Only image files are allowed!"), false);
-    } else cb(null, true);
+    } else {
+      cb(null, true);
+    }
   },
 });
 
@@ -37,25 +39,25 @@ router.get("/", async (req, res) => {
     const categories = await Category.find();
     res.json(categories);
   } catch (err) {
-    globalThis.console.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-//  Create a new category
+// Create a new category
 router.post("/", upload.single("image"), async (req, res) => {
   const category = new Category({
     name: req.body.name,
-    image: req.file ? `/uploads/${req.file.filename}` : null,
-  })
+    image: req.file ? `/uploads/${req.file.filename}` : null, // Fixed: Use backticks for template literal
+  });
 
   try {
-    const newCategory = await category.save()
-    res.status(201).json(newCategory)
+    const newCategory = await category.save();
+    res.status(201).json(newCategory);
   } catch (err) {
-    res.status(400).json({ message: err.message })
+    res.status(400).json({ message: err.message });
   }
-})
+});
 
 // Delete a category
 router.delete("/:id", async (req, res) => {
@@ -66,7 +68,7 @@ router.delete("/:id", async (req, res) => {
     }
     res.json({ message: "Category deleted successfully" });
   } catch (err) {
-    globalThis.console.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });

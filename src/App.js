@@ -1,8 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./customer/components/navigation/navigation";
-import Home from "./customer/components/home";
-import ProductPage from "./customer/components/product-page";
-import AdminPanel from "./customer/components/admin-panel"; // Import AdminPanel
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import Navbar from "./customer/components/navigation/navigation"
+import Home from "./customer/components/home"
+import ProductPage from "./customer/components/product-page"
+import AdminPanel from "./customer/components/admin-panel"
+import Contact from "./customer/components/contact"
 
 function App() {
   return (
@@ -18,10 +19,14 @@ function App() {
 
           {/* Admin Panel route */}
           <Route path="/admin" element={<AdminPanel />} />
+
+          {/* Contact page route */}
+          <Route path="/contact" element={<Contact />} />
         </Routes>
       </div>
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App
+
