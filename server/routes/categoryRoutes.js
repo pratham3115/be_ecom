@@ -1,6 +1,37 @@
 const express = require("express");
 const Category = require("../models/category");
+const Joi = require("joi");
+const multer = require("multer");
+const path = require("path");
+
 const router = express.Router();
+
+// Define file upload validation rules
+const fileValidationSchema = Joi.object({
+  name: Joi.string().required().min(2),
+  description: Joi.string().allow(null),
+});
+
+// Configure multer for image uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // Define upload directory
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // Rename file with timestamp
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      cb(new Error("Only image files are allowed!"), false);
+    } else {
+      cb(null, true);
+    }
+  },
+});
 
 // Fetch all categories
 router.get("/", async (req, res) => {
@@ -8,16 +39,21 @@ router.get("/", async (req, res) => {
     const categories = await Category.find();
     res.json(categories);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-// Add a new category
-router.post("/", async (req, res) => {
-  const category = new Category(req.body);
+// Create a new category
+router.post("/", upload.single("image"), async (req, res) => {
+  const category = new Category({
+    name: req.body.name,
+    image: req.file ? `/uploads/${req.file.filename}` : null, // Fixed: Use backticks for template literal
+  });
+
   try {
-    const savedCategory = await category.save();
-    res.status(201).json(savedCategory);
+    const newCategory = await category.save();
+    res.status(201).json(newCategory);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -32,7 +68,8 @@ router.delete("/:id", async (req, res) => {
     }
     res.json({ message: "Category deleted successfully" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
