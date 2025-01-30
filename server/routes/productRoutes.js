@@ -9,57 +9,47 @@ const storage = multer.diskStorage({
     cb(null, "uploads/"); // Define upload directory
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
+    cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
   },
 });
-const upload = multer({ storage });
 
-// Fetch products by category or all products
-router.get("/", async (req, res) => {
-  try {
-    const categoryId = req.query.category;
-    const query = categoryId ? { category: categoryId } : {}; // Filter by category if provided
-    const products = await Product.find(query).populate("category");
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+const upload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed!"), false);
+    }
+    cb(null, true);
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024, // Limit file size to 5MB
+  },
 });
 
-// Add a new product with image upload
+// Add a new product with image upload or URL
 router.post("/", upload.single("image"), async (req, res) => {
   try {
-    const productData = req.body;
-    if (req.file) {
-      productData.image = `/uploads/${req.file.filename}`;
+    if (!req.file && !req.body.imageUrl) {
+      return res.status(400).json({ message: "Image is required (file or URL)" });
     }
+
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : req.body.imageUrl;
+
+    const productData = {
+      name: req.body.name,
+      price: Number.parseFloat(req.body.price),
+      description: req.body.description,
+      inStock: req.body.inStock === "true",
+      category: req.body.category,
+      image: imageUrl,
+    };
+
     const product = new Product(productData);
     const savedProduct = await product.save();
     res.status(201).json(savedProduct);
   } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Update product details
-router.put("/:id", async (req, res) => {
-  try {
-    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    res.json(updatedProduct);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Delete a product
-router.delete("/:id", async (req, res) => {
-  try {
-    await Product.findByIdAndDelete(req.params.id);
-    res.json({ message: "Product deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Error adding product:", err);
+    res.status(500).json({ message: "Something broke!" });
   }
 });
 

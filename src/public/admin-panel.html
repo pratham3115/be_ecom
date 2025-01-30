@@ -20,7 +20,10 @@
     <textarea id="description" name="description" required></textarea><br><br>
 
     <label for="image">Image URL:</label><br>
-    <input type="text" id="image" name="image" required><br><br>
+    <input type="text" id="image" name="image"><br><br>
+
+    <label for="imageFile">Or Upload Image:</label><br>
+    <input type="file" id="imageFile" name="imageFile" accept="image/*"><br><br>
 
     <label for="inStock">In Stock:</label><br>
     <input type="checkbox" id="inStock" name="inStock"><br><br>
@@ -48,7 +51,10 @@
           // Loop through the products and add them to the list
           products.forEach(product => {
             const li = document.createElement('li');
-            li.textContent = `${product.name} - $${product.price}`;
+            li.innerHTML = `
+              ${product.name} - $${product.price}
+              <img src="${product.image}" alt="${product.name}" style="max-width: 100px; max-height: 100px;">
+            `;
             productList.appendChild(li);
           });
         })
@@ -59,23 +65,34 @@
     document.getElementById('product-form').addEventListener('submit', function(e) {
       e.preventDefault(); // Prevent the default form submission
 
-      const formData = {
-        name: document.getElementById('name').value,
-        price: document.getElementById('price').value,
-        description: document.getElementById('description').value,
-        image: document.getElementById('image').value,
-        inStock: document.getElementById('inStock').checked
-      };
+      const formData = new FormData();
+      formData.append('name', document.getElementById('name').value);
+      formData.append('price', document.getElementById('price').value);
+      formData.append('description', document.getElementById('description').value);
+      formData.append('inStock', document.getElementById('inStock').checked);
+
+      const imageUrl = document.getElementById('image').value;
+      const imageFile = document.getElementById('imageFile').files[0];
+
+      if (imageFile) {
+        formData.append('image', imageFile);
+      } else if (imageUrl) {
+        formData.append('imageUrl', imageUrl);
+      }
 
       // Send a POST request to the backend to add a product
       fetch('http://localhost:5000/api/products', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
+        body: formData // Send formData instead of JSON
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          return response.text().then(text => {
+            throw new Error(text);
+          });
+        }
+        return response.json();
+      })
       .then(data => {
         // After adding the product, fetch the updated product list
         fetchProducts();
@@ -84,7 +101,7 @@
         document.getElementById('product-form').reset();
       })
       .catch(error => {
-        alert('Error adding product');
+        alert('Error adding product: ' + error.message);
         console.error(error);
       });
     });
@@ -92,3 +109,4 @@
 
 </body>
 </html>
+

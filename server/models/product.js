@@ -2,14 +2,14 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },  // Product name
-    price: { type: Number, required: true }, // Product price
-    description: { type: String, required: true }, // Product description
-    image: { type: String, required: true }, // Image URL for the product
-    inStock: { type: Boolean, required: true }, // Stock status
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true }, // Category reference
+    name: { type: String, required: true, trim: true },
+    price: { type: Number, required: true, min: 0 },
+    description: { type: String, required: true, trim: true },
+    image: { type: String, required: true },
+    inStock: { type: Boolean, required: true, default: true }, // Ensure default is true
+    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
   },
-  { timestamps: true } // Adds createdAt and updatedAt fields
+  { timestamps: true }
 );
 
 const Product = mongoose.model("Product", productSchema);

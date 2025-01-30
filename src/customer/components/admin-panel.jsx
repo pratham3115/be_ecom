@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
-import "./admin-panel.css";
+import React, { useState, useEffect, useCallback } from "react"
+import axios from "axios"
+import "./admin-panel.css"
 
 // Utility Components
 const Button = ({ children, onClick, disabled, variant = "primary", size = "md", className = "" }) => {
@@ -27,7 +27,7 @@ const Button = ({ children, onClick, disabled, variant = "primary", size = "md",
   )
 }
 
-const Input = ({ id, name, value, onChange, type = "text", placeholder, required }) => (
+const Input = ({ id, name, value, onChange, type = "text", placeholder, required, accept }) => (
   <input
     id={id}
     name={name}
@@ -36,6 +36,7 @@ const Input = ({ id, name, value, onChange, type = "text", placeholder, required
     type={type}
     placeholder={placeholder}
     required={required}
+    accept={accept}
     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
 )
@@ -124,15 +125,17 @@ export default function AdminPanel() {
   const [categories, setCategories] = useState([])
   const [formData, setFormData] = useState({
     name: "",
-    price: 0,
+    price: "",
     description: "",
     image: "",
+    imagePreview: null,
     inStock: true,
     category: "",
   })
   const [categoryFormData, setCategoryFormData] = useState({
     name: "",
     image: "",
+    imageFile: null,
   })
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("categories")
@@ -144,29 +147,28 @@ export default function AdminPanel() {
   }
 
   const showToast = useCallback((message, type = "success") => {
-    setToast({ message, type });
-  }, []);
-  
+    setToast({ message, type })
+  }, [])
+
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/products");
-      setProducts(response.data || []);
+      const response = await axios.get("http://localhost:5000/api/products")
+      setProducts(response.data || [])
     } catch (error) {
-      console.error("Error fetching products:", error);
-      showToast("Failed to fetch products.", "error");
+      console.error("Error fetching products:", error)
+      showToast("Failed to fetch products.", "error")
     }
-  }, [showToast]); // No warning now
-  
+  }, [showToast])
+
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/categories");
-      setCategories(response.data || []);
+      const response = await axios.get("http://localhost:5000/api/categories")
+      setCategories(response.data || [])
     } catch (error) {
-      console.error("Error fetching categories:", error);
-      showToast("Failed to fetch categories.", "error");
+      console.error("Error fetching categories:", error)
+      showToast("Failed to fetch categories.", "error")
     }
-  }, [showToast]); 
-  
+  }, [showToast])
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -195,17 +197,43 @@ export default function AdminPanel() {
   }
 
   const handleInputChange = (e) => {
-    const { name, value, type } = e.target
-    setFormData({ ...formData, [name]: type === "number" ? Number.parseFloat(value) : value })
+    const { name, value, type, files } = e.target
+    if (type === "file") {
+      setFormData({ ...formData, [name]: files[0], imagePreview: URL.createObjectURL(files[0]) })
+    } else if (type === "number") {
+      setFormData({ ...formData, [name]: value === "" ? "" : Number(value) })
+    } else {
+      setFormData({ ...formData, [name]: value })
+    }
+  }
+
+  const handleCategoryInputChange = (e) => {
+    const { name, value, type, files } = e.target
+    if (type === "file") {
+      setCategoryFormData({ ...categoryFormData, [name]: URL.createObjectURL(files[0]), imageFile: files[0] })
+    } else {
+      setCategoryFormData({ ...categoryFormData, [name]: value })
+    }
   }
 
   const handleAddCategory = async () => {
     if (categoryFormData.name.trim()) {
       setLoading(true)
       try {
-        const response = await axios.post("http://localhost:5000/api/categories", categoryFormData)
+        const formData = new FormData()
+        formData.append("name", categoryFormData.name)
+        if (categoryFormData.imageFile) {
+          formData.append("image", categoryFormData.imageFile)
+        } else if (categoryFormData.image) {
+          formData.append("imageUrl", categoryFormData.image)
+        }
+        const response = await axios.post("http://localhost:5000/api/categories", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
         setCategories([...categories, response.data])
-        setCategoryFormData({ name: "", image: "" })
+        setCategoryFormData({ name: "", image: "", imageFile: null })
         showToast("Category added successfully!")
       } catch (err) {
         console.error("Error adding category:", err)
@@ -237,13 +265,32 @@ export default function AdminPanel() {
   const handleAddProduct = async () => {
     setLoading(true)
     try {
-      const response = await axios.post("http://localhost:5000/api/products", formData)
+      const productData = new FormData()
+      productData.append("name", formData.name)
+      productData.append("price", formData.price)
+      productData.append("description", formData.description)
+      productData.append("inStock", formData.inStock)
+      productData.append("category", formData.category)
+
+      if (formData.image instanceof File) {
+        productData.append("image", formData.image)
+      } else if (typeof formData.image === "string" && formData.image.trim() !== "") {
+        productData.append("imageUrl", formData.image)
+      } else {
+        throw new Error("Image is required (file or URL)")
+      }
+
+      const response = await axios.post("http://localhost:5000/api/products", productData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
       setProducts([...products, response.data])
       resetForm()
       showToast("Product added successfully!")
     } catch (err) {
-      console.error("Error adding product:", err)
-      showToast("Failed to add product.", "error")
+      console.error("Error adding product:", err.response ? err.response.data : err)
+      showToast(`Failed to add product. ${err.response ? err.response.data.message : err.message}`, "error")
     } finally {
       setLoading(false)
     }
@@ -286,9 +333,10 @@ export default function AdminPanel() {
   const resetForm = () => {
     setFormData({
       name: "",
-      price: 0,
+      price: "",
       description: "",
       image: "",
+      imagePreview: null,
       inStock: true,
       category: "",
     })
@@ -337,8 +385,6 @@ export default function AdminPanel() {
   }
 
   return (
-      
-
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
@@ -367,8 +413,9 @@ export default function AdminPanel() {
                     <Label htmlFor="categoryName">Category Name</Label>
                     <Input
                       id="categoryName"
+                      name="name"
                       value={categoryFormData.name}
-                      onChange={(e) => setCategoryFormData({ ...categoryFormData, name: e.target.value })}
+                      onChange={handleCategoryInputChange}
                       placeholder="Enter category name"
                     />
                   </div>
@@ -376,15 +423,26 @@ export default function AdminPanel() {
                     <Label htmlFor="categoryImage">Category Image URL</Label>
                     <Input
                       id="categoryImage"
+                      name="image"
                       value={categoryFormData.image}
-                      onChange={(e) => setCategoryFormData({ ...categoryFormData, image: e.target.value })}
+                      onChange={handleCategoryInputChange}
                       placeholder="Enter category image URL"
                     />
                   </div>
-                  {categoryFormData.image && (
+                  <div className="grid gap-2">
+                    <Label htmlFor="categoryImageFile">Or Upload Image</Label>
+                    <Input
+                      id="categoryImageFile"
+                      name="imageFile"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCategoryInputChange}
+                    />
+                  </div>
+                  {(categoryFormData.image || categoryFormData.imageFile) && (
                     <div className="mt-2">
                       <img
-                        src={categoryFormData.image || "/placeholder.svg"}
+                        src={categoryFormData.image || categoryFormData.imageFile}
                         alt="Category preview"
                         className="w-32 h-32 object-cover rounded-lg"
                       />
@@ -446,6 +504,8 @@ export default function AdminPanel() {
                       name="price"
                       value={formData.price}
                       onChange={handleInputChange}
+                      min="0"
+                      step="0.01"
                     />
                   </div>
                   <div className="grid gap-2">
@@ -459,12 +519,28 @@ export default function AdminPanel() {
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="productImage">Image URL</Label>
-                    <Input id="productImage" name="image" value={formData.image} onChange={handleInputChange} />
+                    <Input
+                      id="productImage"
+                      name="image"
+                      value={formData.image instanceof File ? "" : formData.image}
+                      onChange={handleInputChange}
+                      placeholder="Enter product image URL"
+                    />
                   </div>
-                  {formData.image && (
+                  <div className="grid gap-2">
+                    <Label htmlFor="productImageFile">Or Upload Image</Label>
+                    <Input
+                      id="productImageFile"
+                      name="image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  {formData.imagePreview && (
                     <div className="mt-2">
                       <img
-                        src={formData.image || "/placeholder.svg"}
+                        src={formData.imagePreview || "/placeholder.svg"}
                         alt="Product preview"
                         className="w-32 h-32 object-cover rounded-lg"
                       />
@@ -553,3 +629,4 @@ export default function AdminPanel() {
     </div>
   )
 }
+
