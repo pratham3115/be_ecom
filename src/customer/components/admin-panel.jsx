@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useCallback } from "react"
-import axios from "axios"
-import "./admin-panel.css"
+import React, { useState, useEffect, useCallback } from "react";
+import axios from "axios";
+import "./admin-panel.css";
 
 // Utility Components
 const Button = ({ children, onClick, disabled, variant = "primary", size = "md", className = "" }) => {
-  const baseStyle = "font-semibold rounded focus:outline-none transition-colors"
+  const baseStyle = "font-semibold rounded focus:outline-none transition-colors";
   const sizeClasses = {
     sm: "px-2 py-1 text-sm",
     md: "px-4 py-2",
     lg: "px-6 py-3 text-lg",
-  }
+  };
   const variantClasses = {
     primary: "bg-blue-500 text-white hover:bg-blue-600",
     secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300",
     destructive: "bg-red-500 text-white hover:bg-red-600",
-  }
+  };
 
   return (
     <button
@@ -24,8 +24,8 @@ const Button = ({ children, onClick, disabled, variant = "primary", size = "md",
     >
       {children}
     </button>
-  )
-}
+  );
+};
 
 const Input = ({ id, name, value, onChange, type = "text", placeholder, required, accept }) => (
   <input
@@ -39,13 +39,13 @@ const Input = ({ id, name, value, onChange, type = "text", placeholder, required
     accept={accept}
     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
-)
+);
 
 const Label = ({ htmlFor, children }) => (
   <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-700 mb-1">
     {children}
   </label>
-)
+);
 
 const Textarea = ({ id, name, value, onChange, placeholder }) => (
   <textarea
@@ -57,17 +57,17 @@ const Textarea = ({ id, name, value, onChange, placeholder }) => (
     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
     rows="3"
   />
-)
+);
 
 const Card = ({ children, className = "" }) => (
   <div className={`bg-white shadow-md rounded-lg overflow-hidden ${className}`}>{children}</div>
-)
+);
 
-const CardHeader = ({ children }) => <div className="px-6 py-4 border-b">{children}</div>
+const CardHeader = ({ children }) => <div className="px-6 py-4 border-b">{children}</div>;
 
-const CardContent = ({ children }) => <div className="px-6 py-4">{children}</div>
+const CardContent = ({ children }) => <div className="px-6 py-4">{children}</div>;
 
-const CardTitle = ({ children }) => <h2 className="text-xl font-semibold">{children}</h2>
+const CardTitle = ({ children }) => <h2 className="text-xl font-semibold">{children}</h2>;
 
 const Switch = ({ id, checked, onChange }) => (
   <label htmlFor={id} className="flex items-center cursor-pointer">
@@ -79,11 +79,11 @@ const Switch = ({ id, checked, onChange }) => (
       ></div>
     </div>
   </label>
-)
+);
 
-const Tabs = ({ children }) => <div className="mb-4">{children}</div>
+const Tabs = ({ children }) => <div className="mb-4">{children}</div>;
 
-const TabsList = ({ children }) => <div className="flex border-b">{children}</div>
+const TabsList = ({ children }) => <div className="flex border-b">{children}</div>;
 
 const TabsTrigger = ({ children, isActive, onClick }) => (
   <button
@@ -94,17 +94,17 @@ const TabsTrigger = ({ children, isActive, onClick }) => (
   >
     {children}
   </button>
-)
+);
 
-const TabsContent = ({ children, isActive }) => <div className={isActive ? "block" : "hidden"}>{children}</div>
+const TabsContent = ({ children, isActive }) => <div className={isActive ? "block" : "hidden"}>{children}</div>;
 
 const Toast = ({ message, type = "success", onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
-      onClose()
-    }, 3000)
-    return () => clearTimeout(timer)
-  }, [onClose])
+      onClose();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
 
   return (
     <div
@@ -114,15 +114,15 @@ const Toast = ({ message, type = "success", onClose }) => {
     >
       {message}
     </div>
-  )
-}
+  );
+};
 
 // Main Component
 export default function AdminPanel() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [loginData, setLoginData] = useState({ username: "", password: "" })
-  const [products, setProducts] = useState([])
-  const [categories, setCategories] = useState([])
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginData, setLoginData] = useState({ username: "", password: "" });
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -131,204 +131,204 @@ export default function AdminPanel() {
     imagePreview: null,
     inStock: true,
     category: "",
-  })
+  });
   const [categoryFormData, setCategoryFormData] = useState({
     name: "",
     image: "",
     imageFile: null,
-  })
-  const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState("categories")
-  const [toast, setToast] = useState(null)
+  });
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("categories");
+  const [toast, setToast] = useState(null);
 
   const ADMIN_CREDENTIALS = {
     username: "admin",
     password: "123",
-  }
+  };
 
   const showToast = useCallback((message, type = "success") => {
-    setToast({ message, type })
-  }, [])
+    setToast({ message, type });
+  }, []);
 
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/products")
-      setProducts(response.data || [])
+      const response = await axios.get("http://localhost:5000/api/products");
+      setProducts(response.data || []);
     } catch (error) {
-      console.error("Error fetching products:", error)
-      showToast("Failed to fetch products.", "error")
+      console.error("Error fetching products:", error);
+      showToast("Failed to fetch products.", "error");
     }
-  }, [showToast])
+  }, [showToast]);
 
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/categories")
-      setCategories(response.data || [])
+      const response = await axios.get("http://localhost:5000/api/categories");
+      setCategories(response.data || []);
     } catch (error) {
-      console.error("Error fetching categories:", error)
-      showToast("Failed to fetch categories.", "error")
+      console.error("Error fetching categories:", error);
+      showToast("Failed to fetch categories.", "error");
     }
-  }, [showToast])
+  }, [showToast]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchProducts()
-      fetchCategories()
+      fetchProducts();
+      fetchCategories();
     }
-  }, [isAuthenticated, fetchProducts, fetchCategories])
+  }, [isAuthenticated, fetchProducts, fetchCategories]);
 
   const handleLoginChange = (e) => {
-    const { name, value } = e.target
-    setLoginData({ ...loginData, [name]: value })
-  }
+    const { name, value } = e.target;
+    setLoginData({ ...loginData, [name]: value });
+  };
 
   const handleLogin = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (loginData.username === ADMIN_CREDENTIALS.username && loginData.password === ADMIN_CREDENTIALS.password) {
-      setIsAuthenticated(true)
+      setIsAuthenticated(true);
     } else {
-      showToast("Invalid username or password", "error")
+      showToast("Invalid username or password", "error");
     }
-  }
+  };
 
   const handleLogout = () => {
-    setIsAuthenticated(false)
-    setLoginData({ username: "", password: "" })
-  }
+    setIsAuthenticated(false);
+    setLoginData({ username: "", password: "" });
+  };
 
   const handleInputChange = (e) => {
-    const { name, value, type, files } = e.target
+    const { name, value, type, files } = e.target;
     if (type === "file") {
-      setFormData({ ...formData, [name]: files[0], imagePreview: URL.createObjectURL(files[0]) })
+      setFormData({ ...formData, [name]: files[0], imagePreview: URL.createObjectURL(files[0]) });
     } else if (type === "number") {
-      setFormData({ ...formData, [name]: value === "" ? "" : Number(value) })
+      setFormData({ ...formData, [name]: value === "" ? "" : Number(value) });
     } else {
-      setFormData({ ...formData, [name]: value })
+      setFormData({ ...formData, [name]: value });
     }
-  }
+  };
 
   const handleCategoryInputChange = (e) => {
-    const { name, value, type, files } = e.target
+    const { name, value, type, files } = e.target;
     if (type === "file") {
-      setCategoryFormData({ ...categoryFormData, [name]: URL.createObjectURL(files[0]), imageFile: files[0] })
+      setCategoryFormData({ ...categoryFormData, [name]: URL.createObjectURL(files[0]), imageFile: files[0] });
     } else {
-      setCategoryFormData({ ...categoryFormData, [name]: value })
+      setCategoryFormData({ ...categoryFormData, [name]: value });
     }
-  }
+  };
 
   const handleAddCategory = async () => {
     if (categoryFormData.name.trim()) {
-      setLoading(true)
+      setLoading(true);
       try {
-        const formData = new FormData()
-        formData.append("name", categoryFormData.name)
+        const formData = new FormData();
+        formData.append("name", categoryFormData.name);
         if (categoryFormData.imageFile) {
-          formData.append("image", categoryFormData.imageFile)
+          formData.append("image", categoryFormData.imageFile);
         } else if (categoryFormData.image) {
-          formData.append("imageUrl", categoryFormData.image)
+          formData.append("imageUrl", categoryFormData.image);
         }
         const response = await axios.post("http://localhost:5000/api/categories", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        })
-        setCategories([...categories, response.data])
-        setCategoryFormData({ name: "", image: "", imageFile: null })
-        showToast("Category added successfully!")
+        });
+        setCategories([...categories, response.data]);
+        setCategoryFormData({ name: "", image: "", imageFile: null });
+        showToast("Category added successfully!");
       } catch (err) {
-        console.error("Error adding category:", err)
-        showToast("Failed to add category.", "error")
+        console.error("Error adding category:", err);
+        showToast("Failed to add category.", "error");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     } else {
-      showToast("Please enter a category name.", "error")
+      showToast("Please enter a category name.", "error");
     }
-  }
+  };
 
   const handleDeleteCategory = async (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      setLoading(true)
+      setLoading(true);
       try {
-        await axios.delete(`http://localhost:5000/api/categories/${id}`)
-        setCategories(categories.filter((category) => category._id !== id))
-        showToast("Category deleted successfully!")
+        await axios.delete(`http://localhost:5000/api/categories/${id}`);
+        setCategories(categories.filter((category) => category._id !== id));
+        showToast("Category deleted successfully!");
       } catch (err) {
-        console.error("Error deleting category:", err)
-        showToast("Failed to delete category.", "error")
+        console.error("Error deleting category:", err);
+        showToast("Failed to delete category.", "error");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-  }
+  };
 
   const handleAddProduct = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const productData = new FormData()
-      productData.append("name", formData.name)
-      productData.append("price", formData.price)
-      productData.append("description", formData.description)
-      productData.append("inStock", formData.inStock)
-      productData.append("category", formData.category)
+      const productData = new FormData();
+      productData.append("name", formData.name);
+      productData.append("price", formData.price);
+      productData.append("description", formData.description);
+      productData.append("inStock", formData.inStock);
+      productData.append("category", formData.category);
 
       if (formData.image instanceof File) {
-        productData.append("image", formData.image)
+        productData.append("image", formData.image);
       } else if (typeof formData.image === "string" && formData.image.trim() !== "") {
-        productData.append("imageUrl", formData.image)
+        productData.append("imageUrl", formData.image);
       } else {
-        throw new Error("Image is required (file or URL)")
+        throw new Error("Image is required (file or URL)");
       }
 
       const response = await axios.post("http://localhost:5000/api/products", productData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      })
-      setProducts([...products, response.data])
-      resetForm()
-      showToast("Product added successfully!")
+      });
+      setProducts([...products, response.data]);
+      resetForm();
+      showToast("Product added successfully!");
     } catch (err) {
-      console.error("Error adding product:", err.response ? err.response.data : err)
-      showToast(`Failed to add product. ${err.response ? err.response.data.message : err.message}`, "error")
+      console.error("Error adding product:", err.response ? err.response.data : err);
+      showToast(`Failed to add product. ${err.response ? err.response.data.message : err.message}`, "error");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleDeleteProduct = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
-      setLoading(true)
+      setLoading(true);
       try {
-        await axios.delete(`http://localhost:5000/api/products/${id}`)
-        setProducts(products.filter((product) => product._id !== id))
-        showToast("Product deleted successfully!")
+        await axios.delete(`http://localhost:5000/api/products/${id}`);
+        setProducts(products.filter((product) => product._id !== id));
+        showToast("Product deleted successfully!");
       } catch (err) {
-        console.error("Error deleting product:", err)
-        showToast("Failed to delete product.", "error")
+        console.error("Error deleting product:", err);
+        showToast("Failed to delete product.", "error");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-  }
+  };
 
   const handleToggleStock = async (id, currentStatus) => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await axios.patch(`http://localhost:5000/api/products/${id}`, {
         inStock: !currentStatus,
-      })
+      });
       setProducts(
         products.map((product) => (product._id === id ? { ...product, inStock: response.data.inStock } : product)),
-      )
-      showToast(`Product ${response.data.inStock ? "put in stock" : "put out of stock"} successfully!`)
+      );
+      showToast(`Product ${response.data.inStock ? "put in stock" : "put out of stock"} successfully!`);
     } catch (err) {
-      console.error("Error updating product stock status:", err)
-      showToast("Failed to update product stock status.", "error")
+      console.error("Error updating product stock status:", err);
+      showToast("Failed to update product stock status.", "error");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -339,8 +339,8 @@ export default function AdminPanel() {
       imagePreview: null,
       inStock: true,
       category: "",
-    })
-  }
+    });
+  };
 
   if (!isAuthenticated) {
     return (
@@ -381,7 +381,7 @@ export default function AdminPanel() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -627,6 +627,5 @@ export default function AdminPanel() {
       </div>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
-  )
+  );
 }
-

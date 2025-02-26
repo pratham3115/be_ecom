@@ -1,7 +1,6 @@
-"use client";
-
 import React, { useState, useEffect, useRef } from "react";
-import { ShoppingCart, Search, Minus, Plus, Trash2, X, Heart, Eye } from "lucide-react";
+import { ShoppingCart, Search, Heart, Eye, X } from "lucide-react";
+import ProductModal from "./ProductModal"; // Import the modal component
 import "../styles/product-page.css";
 
 export default function ProductPage() {
@@ -12,10 +11,9 @@ export default function ProductPage() {
   const [cart, setCart] = useState(new Map());
   const [wishlist, setWishlist] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState("");
-  const [showCart, setShowCart] = useState(false);
   const [showQuickView, setShowQuickView] = useState(null);
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [showFloatingCart, setShowFloatingCart] = useState(false);
+  const [showCart, setShowCart] = useState(false);
+  const [showFloatingCart, setShowFloatingCart] = useState(false); // Define showFloatingCart state
 
   // Ref declarations
   const headerRef = useRef(null);
@@ -202,6 +200,15 @@ export default function ProductPage() {
           <div className="product-grid">{renderProductGrid()}</div>
         </div>
       </main>
+
+      {/* Product Modal */}
+      {showQuickView && (
+        <ProductModal
+          product={showQuickView}
+          onClose={() => setShowQuickView(null)}
+          handleAddToCart={handleAddToCart}
+        />
+      )}
     </div>
   );
 }
